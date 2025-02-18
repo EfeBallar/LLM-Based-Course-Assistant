@@ -16,7 +16,7 @@ from Routes.CourseRoutes.getPersonnelFromCourse import get_personnel_from_course
 from Routes.CourseRoutes.removePersonFromCourse import remove_person_from_course
 
 # File Routes
-from Routes.FileRoutes.removeFileFromCourse import remove_file_from_course
+from Routes.FileRoutes.removeFileFromCourse import remove_files_from_course
 from Routes.FileRoutes.addFileToCourse import add_files_to_course
 from Routes.FileRoutes.removeAllFilesOfACourse import remove_all_files_from_course
 from Routes.FileRoutes.getFilesOfACourse import get_files_of_a_course
@@ -83,7 +83,7 @@ def add_file_to_course_route():
 ##################### DELETE Routes #####################
 @app.route('/removeFileFromCourse', methods=['DELETE'])
 def remove_file_from_course_route():
-    return remove_file_from_course(db)
+    return remove_files_from_course(db)
 
 @app.route('/removePersonFromCourse', methods=['DELETE'])
 def remove_person_from_course_route():

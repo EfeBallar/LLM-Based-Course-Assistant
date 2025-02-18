@@ -78,7 +78,7 @@ def add_files_to_course(db):
     files_added = []    # this will keep track of files that are successfully added
     files_failed = []   # this will keep track of files that are not added due to error
     for file in files:
-        response_data, status_code = add_helper(file, course_code) 
+        response_data, http_code = add_helper(file, course_code) 
         if(response_data["status"] == 1):   # if the file has succesfully been added
             files_added.append(file.filename)
         else:
