@@ -163,4 +163,6 @@ cython_debug/
 
 /main-server/faiss/
 /main-server/documents/
+/documents/
+/faiss/
 
