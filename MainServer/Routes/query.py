@@ -9,9 +9,6 @@ import torch.nn.functional as F
 import faiss
 import pickle
 import os
-import re
-
-import time
 
 load_dotenv()
 LLM_MODEL=os.getenv("LLM_MODEL")
@@ -66,23 +63,26 @@ def retrieve_from_vector_database(question,course):
     return context_chunks, sources
 
 def answer_from_chat_history(question, messages, llm_model):
-    # Build a strict prompt that forces usage of ONLY the chat history.
-    chat_history = ""
+    # Build a strict, clearly delimited chat history.
+    chat_history_lines = []
     for message in messages:
-        chat_history += f"{message['sender']}: {message['message_content']}\n"
-
-    print(chat_history)
-
-    # Construct the prompt with very strict instructions.
+        # Using uppercase to clearly mark the speaker.
+        chat_history_lines.append(f"[{message['sender'].upper()}] {message['message_content']}")
+    chat_history = "\n".join(chat_history_lines)
+    
+    # Construct a more explicit prompt with clear boundaries and fallback instructions.
     prompt_text = (
-        "Below is the full conversation between a user and a context-based AI assistant:\n\n"
-        f"{chat_history}\n\n"
-        "Based ONLY on the conversation above, answer the following question using ONLY the CHAT HISTORY provided."
-        "If the answer cannot be determined solely from the above conversation, respond with 'I cannot answer this question based solely on our chat history alone.'\n\n"
-        f"Question: {question}\n"
+        "You are an AI assistant. Answer the following question strictly using ONLY the conversation below. "
+        "Do NOT use any external knowledge or assumptions. "
+        "If the answer cannot be determined solely by kthe conversation, respond EXACTLY with 'I cannot answer this question based solely on our chat history alone.'\n\n"
+        "===== Conversation Begin =====\n"
+        f"{chat_history}\n"
+        "===== Conversation End =====\n\n"
+        f"Question: {question}\n\n"
         "Answer:"
     )
-    
+    print(prompt_text)
+
     response = llm_model.invoke(prompt_text).content
     print(response)
     return response
