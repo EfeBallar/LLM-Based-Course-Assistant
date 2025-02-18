@@ -128,59 +128,84 @@ def embed_chunks(chunks_data: list, model_name: str = "all-MiniLM-L6-v2", conver
     
     return chunks_data
 
+
 def save_chunks_to_faiss(chunks_data: list,
                          index_file: str = "faiss_index.idx",
                          metadata_file: str = "metadata.pkl") -> None:
     """
-    Save embeddings from chunks_data into a FAISS vector index 
+    Save embeddings from chunks_data into a FAISS vector index, creating necessary files if they don't exist.
     """
+
+    index_file = os.path.join(os.getcwd(), index_file)
+    metadata_file = os.path.join(os.getcwd(), metadata_file)
+
+    os.makedirs(os.path.dirname(index_file), exist_ok=True)  # Ensure directory exists
+
     embeddings = []
     metadata = []
     ids = []
-    
-    # Assign a unique id for each item (starting at 0)
+
+    # Check if FAISS index and metadata file exist
+    if os.path.exists(index_file):
+        index = faiss.read_index(index_file)
+    else:
+        index = None  # Will create a new one
+
+    if os.path.exists(metadata_file):
+        with open(metadata_file, "rb") as f:
+            metadata = pickle.load(f)
+    else:
+        metadata = []
+
+    # Determine the starting ID
+    current_max_id = max((item["id"] for item in metadata), default=-1)
+
     for i, item in enumerate(chunks_data):
-        # Convert embedding to a NumPy array if it's a PyTorch tensor
-        if hasattr(item["embedding"], "cpu"):
-            emb = item["embedding"].cpu().numpy()
-        else:
-            emb = item["embedding"]
-        embeddings.append(emb)
-        
-        # Use i as the unique ID
-        item_id = i
-        ids.append(item_id)
-        # Save metadata with pdf, chunk, page, and id.
-        metadata.append({
-            "file": item["file"],
-            "chunk": item["chunk"],
-            "page": item.get("page", "Unknown"),
-            "id": item_id
-        })
-    
-    # Stack embeddings into a 2D NumPy array of type float32
+        try:
+            # Convert embedding to NumPy array if it's a PyTorch tensor
+            emb = item["embedding"].cpu().numpy() if hasattr(item["embedding"], "cpu") else item["embedding"]
+            embeddings.append(emb)
+
+            # Assign a new unique ID
+            new_id = current_max_id + i + 1
+            ids.append(new_id)
+
+            # Save metadata
+            metadata.append({
+                "file": item["file"],
+                "chunk": item["chunk"],
+                "page": item.get("page", "Unknown"),
+                "id": new_id
+            })
+        except Exception as e:
+            print(f"Error processing chunk {i}: {e}")
+
+    if not embeddings:
+        print("No embeddings found. Nothing to save.")
+        return
+
+    # Stack embeddings into a 2D NumPy array (float32)
     embeddings_matrix = np.vstack(embeddings).astype("float32")
     
-    # Normalize embeddings for cosine similarity (if using inner product on normalized vectors)
+    # Normalize embeddings for cosine similarity
     faiss.normalize_L2(embeddings_matrix)
-    
+
     embedding_dim = embeddings_matrix.shape[1]
-    
-    # Create an index that supports deletion: wrap IndexFlatIP in an IndexIDMap
-    index_flat = faiss.IndexFlatIP(embedding_dim)
-    index = faiss.IndexIDMap(index_flat)
-    
-    # Convert ids list to a NumPy array of type int64
     ids_np = np.array(ids, dtype=np.int64)
-    
-    # Add embeddings with associated ids to the index
+
+    # Create index if it doesn't exist
+    if index is None:
+        index_flat = faiss.IndexFlatIP(embedding_dim)
+        index = faiss.IndexIDMap(index_flat)
+
+    # Add new embeddings
     index.add_with_ids(embeddings_matrix, ids_np)
-    
-    # Save the FAISS index and metadata
+
+    # Save updated FAISS index and metadata
     faiss.write_index(index, index_file)
     with open(metadata_file, "wb") as f:
         pickle.dump(metadata, f)
-    
+
     print(f"Saved FAISS index with {index.ntotal} vectors to '{index_file}'.")
 
 def add_chunks_to_faiss(new_chunks_data: list,
@@ -312,9 +337,9 @@ def delete_chunks_from_file(file_name: str,
     print(f"Deleted {len(ids_to_delete)} chunks from file '{file_name}'.")
 
 if __name__ == "__main__":
-    course_codes = ['temp']
+    course_codes = ['CS307']
     for course_code in course_codes:
-        doc_directory = DOC_PATH + "\\" + course_code
+        doc_directory = f"{DOC_PATH}\\{course_code}" 
         # Process PDFs and generate text chunks
         chunks_data = process_multiple_files(doc_directory, chunk_size=1000, chunk_overlap=200)
         print(f"Extracted {len(chunks_data)} chunks for {course_code}.")
@@ -323,5 +348,5 @@ if __name__ == "__main__":
         chunks_data = embed_chunks(chunks_data, model_name="all-MiniLM-L6-v2", convert_to_tensor=True)
 
         # Save the chunks and their embeddings to a FAISS vector database (with metadata)
-        save_chunks_to_faiss(chunks_data, index_file= V_DB_PATH + "\\" + course_code+"_faiss_index.idx", metadata_file=V_DB_PATH + "\\" + course_code+"_metadata.pkl")
+        save_chunks_to_faiss(chunks_data, index_file= f"{V_DB_PATH}\\{course_code}_faiss_index.idx", metadata_file=f"{V_DB_PATH}\\{course_code}_metadata.pkl")
         print(f"Processed the documents for {course_code}.")
