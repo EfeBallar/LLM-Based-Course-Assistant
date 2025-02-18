@@ -32,6 +32,6 @@ def get_chat_content(db):
 
     except Exception as e:
         return jsonify({
-            "status": "error",
+            "status": 0,
             "message": str(e)
         }), 500

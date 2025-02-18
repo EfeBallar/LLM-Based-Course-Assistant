@@ -60,13 +60,13 @@ def delete_course(db):
 
         # Return success message
         return jsonify({
-            "status": "success",
+            "status": 1,
             "message": f"Course {course_code} has been deleted and removed from all personnel's courses"
         }), 200
 
     except Exception as e:
         # Catch any unexpected errors
         return jsonify({
-            "status": "error",
+            "status": 0,
             "message": str(e)
         }), 500

@@ -18,6 +18,6 @@ def get_user_id(db):
 
     except Exception as e:
         return jsonify({
-            "status": "error",
+            "status": 0,
             "message": str(e)
         }), 500

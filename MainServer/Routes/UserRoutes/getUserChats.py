@@ -58,6 +58,6 @@ def get_user_chats(db):
 
     except Exception as e:
         return jsonify({
-            "status": "error",
+            "status": 0,
             "message": str(e)
         }), 500

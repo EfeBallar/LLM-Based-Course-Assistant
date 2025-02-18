@@ -17,12 +17,12 @@ def get_courses_of_a_lecturer(db):
         else:
 
             return jsonify({
-                "status": "success",
+                "status": 1,
                 "courses": user["auth_courses"]
             }), 200
 
     except Exception as e:
         return jsonify({
-            "status": "error",
+            "status": 0,
             "message": str(e)
         }), 500

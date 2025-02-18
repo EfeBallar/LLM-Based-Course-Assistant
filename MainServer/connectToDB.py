@@ -14,6 +14,7 @@ def connect_to_database():
     CLUSTER_ADDRESS = os.getenv("CLUSTER_ADDRESS")
     APP_NAME = os.getenv("APP_NAME")
 
+   
     uri = f"mongodb+srv://{USERNAME}:{PASSWORD}@{CLUSTER_ADDRESS}/?retryWrites=true&w=majority&appName={APP_NAME}"
 
     # Create a new client and connect to the server

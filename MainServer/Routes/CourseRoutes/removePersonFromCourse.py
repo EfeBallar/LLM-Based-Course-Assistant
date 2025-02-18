@@ -12,14 +12,16 @@ def remove_person_from_course(db):
             return jsonify({"error": "Username and course_code are required"}), 400
         
         user = db.Users.find_one({"email": f"{user_name}@sabanciuniv.edu"})
+
         if not user:
             return jsonify({"error": "User not found"}), 404
        
         course = db.Courses.find_one({"courseCode": course_code})
         if not course:
             return jsonify({"error": "Course not found"}), 404
+
         
-        if (str(user["_id"]) in course["personnel_ids"]):
+        if (user["_id"] in course["personnel_ids"]):
 
             # Remove the course code from user's auth_courses array
             db.Users.update_one(
@@ -30,16 +32,16 @@ def remove_person_from_course(db):
             # Remove the user_id from the course's personnel array
             db.Courses.update_one(
                 {"courseCode": course_code},
-                {"$pull": {"personnel_ids": str(user["_id"])}}
+                {"$pull": {"personnel_ids": user["_id"]}}
             )
 
             return jsonify({
-                "status": "success",
+                "status": 1,
                 "message": f"{user['name']} has been removed from {course_code}"
             }), 200
 
     except Exception as e:
         return jsonify({
-            "status": "error",
+            "status": 0,
             "message": str(e)
         }), 500

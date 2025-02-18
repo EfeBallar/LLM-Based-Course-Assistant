@@ -45,7 +45,7 @@ def add_course(db):
 
         # Success response with a detailed message
         return jsonify({
-            "status": "success",
+            "status": 1,
             "message": f"{course_code} has been created and added to {instructor['name']}'s courses",
             "data": {
                 "courseCode": course_code,
@@ -57,6 +57,6 @@ def add_course(db):
     except Exception as e:
         # Catch any unexpected errors
         return jsonify({
-            "status": "error",
+            "status": 0,
             "message": str(e)
         }), 500

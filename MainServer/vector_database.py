@@ -1,14 +1,13 @@
-import os
-import PyPDF2
-from docx import Document
+from sentence_transformers import SentenceTransformer
+from dotenv import load_dotenv
 from pptx import Presentation
 from flask import jsonify
-from sentence_transformers import SentenceTransformer
-import torch
-import faiss
+from docx import Document
 import numpy as np
+import PyPDF2
 import pickle
-from dotenv import load_dotenv
+import faiss
+import os
 
 load_dotenv()
 DOC_PATH = os.getenv("DOC_PATH")
@@ -128,7 +127,6 @@ def embed_chunks(chunks_data: list, model_name: str = "all-MiniLM-L6-v2", conver
     
     return chunks_data
 
-
 def save_chunks_to_faiss(chunks_data: list,
                          index_file: str = "faiss_index.idx",
                          metadata_file: str = "metadata.pkl") -> None:
@@ -206,94 +204,19 @@ def save_chunks_to_faiss(chunks_data: list,
     with open(metadata_file, "wb") as f:
         pickle.dump(metadata, f)
 
-    print(f"Saved FAISS index with {index.ntotal} vectors to '{index_file}'.")
+    print(f"Saved FAISS index with {index.ntotal} vectors to '{index_file}'.\n")
 
-def add_chunks_to_faiss(new_chunks_data: list,
-                        index_file: str = "faiss_index.idx",
-                        metadata_file: str = "metadata.pkl") -> None:
-    """
-    Add new chunk embeddings and metadata to an existing FAISS index and metadata file.
-    """
-
-
-    index_file = f"{os.getcwd()}\\faiss\\{index_file}"
-    metadata_file = f"{os.getcwd()}\\faiss\\{metadata_file}"
-
-
-    # Load the existing FAISS index (assumed to be an IndexIDMap)
-    try:
-        index = faiss.read_index(index_file)
-    except Exception as e:
-        print(e)
-
-    # Load existing metadata (or start with an empty list)
-    try:
-        with open(metadata_file, "rb") as f:
-            metadata = pickle.load(f)
-    except FileNotFoundError:
-        print(f"Metadata file '{metadata_file}' not found. Starting with an empty metadata list.")
-        metadata = []
-    new_embeddings = []
-    new_ids = []
-    
-    # Determine the starting id for new vectors
-    if metadata:
-        current_max_id = max(item["id"] for item in metadata)
-
-    else:
-        current_max_id = -1
-
-    # Process each new chunk
-    for i, item in enumerate(new_chunks_data):
-        try:
-            if hasattr(item["embedding"], "cpu"):
-                emb = item["embedding"].cpu().numpy()
-            else:
-                emb = item["embedding"]
-            new_embeddings.append(emb)
-
-            
-            # Assign a new unique id
-            new_id = current_max_id + i + 1
-            new_ids.append(new_id)
-            
-            metadata.append({
-                "pdf": item["pdf"],
-                "chunk": item["chunk"],
-                "page": item.get("page", "Unknown"),
-                "id": new_id
-            })
-        except Exception as e:
-            print(e)
-
-    
-    # Stack new embeddings into a 2D NumPy array (float32)
-    new_embeddings_matrix = np.vstack(new_embeddings).astype("float32")
-    
-    # Normalize new embeddings
-    faiss.normalize_L2(new_embeddings_matrix)
-    
-    new_ids_np = np.array(new_ids, dtype=np.int64)
-    
-    # Add new embeddings (with their ids) to the index
-    index.add_with_ids(new_embeddings_matrix, new_ids_np)
-    
-    # Save the updated FAISS index and metadata
-    faiss.write_index(index, index_file)
-    with open(metadata_file, "wb") as f:
-        pickle.dump(metadata, f)
-    
-    print(f"Added {len(new_chunks_data)} new vectors. Total vectors in index: {index.ntotal}.")
-
-def delete_chunks_from_file(file_name: str,
+def delete_chunks_from_file(
+                            file_name: str,
+                            has_multiple_files: bool = True,
                             index_file: str = "faiss_index.idx",
                             metadata_file: str = "metadata.pkl") -> None:
     """
     Delete all vector chunks corresponding to a given file from the FAISS vector database.
     """
 
-    index_file = f"{os.getcwd()}\\faiss\\{index_file}"
-    metadata_file = f"{os.getcwd()}\\faiss\\{metadata_file}"
+    index_file = f"{os.getcwd()}\\{index_file}"
+    metadata_file = f"{os.getcwd()}\\{metadata_file}"
 
     # Load the FAISS index
     index = faiss.read_index(index_file)
@@ -311,7 +234,7 @@ def delete_chunks_from_file(file_name: str,
     
     # Identify vectors (by id) that belong to the specified file.
     for item in metadata:
-        if item.get("pdf") == file_name:
+        if item.get("file") == file_name:
             if "id" in item:
                 ids_to_delete.append(item["id"])
             else:
@@ -335,6 +258,12 @@ def delete_chunks_from_file(file_name: str,
         pickle.dump(updated_metadata, f)
     
     print(f"Deleted {len(ids_to_delete)} chunks from file '{file_name}'.")
+    if (not has_multiple_files):    # if it was the only file to be deleted, remove the folder
+        print(f"deleted {index_file}")
+        print(f"deleted {metadata_file}")
+        
+        os.remove(index_file)
+        os.remove(metadata_file)
 
 if __name__ == "__main__":
     course_codes = ['CS307']

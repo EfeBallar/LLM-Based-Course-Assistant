@@ -36,12 +36,12 @@ def add_person_to_course(db):
             )
 
             return jsonify({
-                "status": "success",
+                "status": 1,
                 "message": f"{user['name']} has been added to {course_code}"
             }), 200
 
     except Exception as e:
         return jsonify({
-            "status": "error",
+            "status": 0,
             "message": str(e)
         }), 500

@@ -4,7 +4,7 @@ from bson import ObjectId
 
 def get_personnel_from_course(db):
     try:
-        course_code = request.json.get('course_code')
+        course_code = request.args.get('course_code')
         if not course_code:
             return jsonify({"error": "Course code is required"}), 400
 
@@ -12,17 +12,17 @@ def get_personnel_from_course(db):
         if not course:
             return jsonify({"error": "Course not found"}), 404
           
-        personnel_ids = course['personnel_ids']
+        personnel_ids = [str(id) for id in course['personnel_ids']]
+
         personnel = list(db.Users.find({"_id": {"$in": [ObjectId(pid) for pid in personnel_ids]}}))
-        personnel_names = [p['name'] for p in personnel]
+        personnel_data = [{"id": str(p['_id']), "name": p['name']} for p in personnel]
 
         return jsonify({
-            "personnel_ids": personnel_ids,
-            "personnel_names": personnel_names
+            "personnel_data": personnel_data
         }), 200
 
     except Exception as e:
         return jsonify({
-            "status": "error",
+            "status": 0,
             "message": str(e)
         }), 500
