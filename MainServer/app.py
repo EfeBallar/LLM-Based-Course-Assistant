@@ -89,7 +89,7 @@ def token_required(f):
 
 # this will be used only for development, will not be in the final product
 @app.route('/protected_area')
-@token_required
+# @token_required
 def protected_area():
     return jsonify({"message": "Welcome to the protected area!", "user": request.user})
 
@@ -98,80 +98,80 @@ def protected_area():
 
 ##################### GET Routes #####################
 @app.route('/getUserID', methods=['GET'])
-@token_required
+# @token_required
 def get_user_id_route():
     return get_user_id(db)
 
 @app.route('/getCourses', methods=['GET'])
-@token_required
+# @token_required
 def get_courses_route():
     return get_courses(db)
 
 @app.route('/getPersonnelFromCourse', methods=['GET'])
-@token_required
+# @token_required
 def get_personnel_from_course_route():
     return get_personnel_from_course(db)
 
 @app.route('/getUserChats', methods=['GET'])  
-@token_required
+# @token_required
 def get_user_chats_route():
     return get_user_chats(db)
 
 @app.route('/getChatContent', methods=['GET'])  
-@token_required
+# @token_required
 def get_chat_content_route():
     return get_chat_content(db)
 
 @app.route('/getLecturerCourses', methods=['GET'])  
-@token_required
+# @token_required
 def get_lecturer_courses_route():
     return get_courses_of_a_lecturer(db)
 
 @app.route('/getCourseFiles', methods=['GET'])  
-@token_required
+# @token_required
 def get_course_files_route():
     return get_files_of_a_course(db)
 
 ##################### POST Routes #####################
 @app.route('/', methods=['POST'])
-@token_required
+# # @token_required
 def query_route():
     return query(db)
 
 @app.route('/addCourse', methods=['POST'])
-@token_required
+# @token_required
 def add_course_route():
     return add_course(db)
 
 ##################### PUT Routes #####################
 @app.route('/addPersonToCourse', methods=['PUT'])
-@token_required
+# @token_required
 def add_person_to_course_route():
     return add_person_to_course(db)
 
 @app.route('/addFileToCourse', methods=['PUT'])
-@token_required
+# @token_required
 def add_file_to_course_route():
     return add_files_to_course(db) 
 
 ##################### DELETE Routes #####################
 @app.route('/removeFileFromCourse', methods=['DELETE'])
-@token_required
+# @token_required
 def remove_file_from_course_route():
     return remove_files_from_course(db)
 
 @app.route('/removePersonFromCourse', methods=['DELETE'])
-@token_required
+# @token_required
 def remove_person_from_course_route():
     return remove_person_from_course(db)
 
 @app.route('/removeAllFilesFromCourse', methods=['DELETE'])
-@token_required
+# @token_required
 def remove_all_files_from_course_route():
     return remove_all_files_from_course(db) 
 
 @app.route('/deleteCourse', methods=['DELETE'])
-@token_required
+# @token_required
 def delete_course_route():
     return delete_course(db) 
 
