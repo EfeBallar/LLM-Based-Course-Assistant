@@ -49,7 +49,7 @@ def get_files_of_a_course(db):
                 "status": 1,
                 "files": [], 
                 "file_count": 0, 
-                "msg": "There are no files for this course in the database."}), 404
+                "msg": "There are no files for this course in the database."}), 200
 
         # Sort the files by filename
         files.sort(key=lambda x: x["name"])
