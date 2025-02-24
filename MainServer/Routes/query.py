@@ -11,11 +11,22 @@ import pickle
 import os
 
 load_dotenv()
-LLM_MODEL=os.getenv("LLM_MODEL")
+LLAMA_LBL=os.getenv("LLAMA_LBL")
+MISTRAL_LBL=os.getenv("MISTRAL_LBL")
+DEEPSEEK_LBL=os.getenv("DEEPSEEK_LBL")
+GEMMA_LBL=os.getenv("GEMMA_LBL")
+
 V_DB_PATH = os.getenv("V_DB_PATH")
 THRESHOLD = float(os.getenv("CHUNK_RELEVANCY_THRESHOLD"))
 TITLE_GENERATION_MODEL = os.getenv("TITLE_GENERATION_MODEL")
-llm_model = ChatOllama(model=LLM_MODEL, temperature = 0)
+
+llm_model = None    # Created None by default
+llama_model = ChatOllama(model=LLAMA_LBL, temperature = 0) 
+mistral_model = ChatOllama(model=MISTRAL_LBL, temperature = 0) 
+deepseek_model = ChatOllama(model=DEEPSEEK_LBL, temperature = 0) 
+gemma_model = ChatOllama(model=GEMMA_LBL, temperature = 0) 
+
+
 transformer_model = SentenceTransformer("all-MiniLM-L6-v2")
 title_model = ChatOllama(model=TITLE_GENERATION_MODEL, temperature = 0)
 
@@ -74,7 +85,7 @@ def answer_from_chat_history(question, messages, llm_model):
     prompt_text = (
         "You are an AI assistant. Answer the following question strictly using ONLY the conversation below. "
         "Do NOT use any external knowledge or assumptions. "
-        "If the answer cannot be determined solely by kthe conversation, respond EXACTLY with 'I cannot answer this question based solely on our chat history alone.'\n\n"
+        "If the answer cannot be determined solely by the conversation, respond EXACTLY with 'I cannot answer this question based solely on our chat history alone.'\n\n"
         "===== Conversation Begin =====\n"
         f"{chat_history}\n"
         "===== Conversation End =====\n\n"
@@ -152,6 +163,19 @@ def query(course_db):
     question = request.json.get('question')
     user_id = request.json.get('user_id')
     chat_id = request.json.get('chat_id')
+    user_model_pref = request.json.get('model')
+
+    print(f"user_model_pref: {user_model_pref}")
+
+    if (user_model_pref == LLAMA_LBL):
+        llm_model = llama_model
+    elif (user_model_pref == MISTRAL_LBL):
+        llm_model = mistral_model
+    elif (user_model_pref == DEEPSEEK_LBL):
+        llm_model = deepseek_model
+    elif (user_model_pref == GEMMA_LBL):
+        llm_model = gemma_model
+
 
     if not question or not course or not user_id:
         return jsonify({"error": "Missing query text, course, or user_id"}), 400
