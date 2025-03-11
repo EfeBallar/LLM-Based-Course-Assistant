@@ -9,3 +9,6 @@ db.Courses.create_index([("courseCode", ASCENDING)], unique=True)
 
 # Create the Users collection with a unique index on "email"
 db.Users.create_index([("email", ASCENDING)], unique=True)
+
+# Create the Admins collection with a unique index on "email"
+db.Admins.create_index([("email", ASCENDING)], unique=True)
