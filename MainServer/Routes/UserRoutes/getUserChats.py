@@ -21,20 +21,17 @@ def extract_fields(data):
 
 def get_user_chats(db):
     try:
-        user_name = request.args.get('user_name')  # Get 'user_name' from query parameters
+        request_user = request.user
+        # print(request_user)
+
+        user = db.Users.find_one({"email": request_user.get("email")})
         
-        if not user_name:
-            return jsonify({"error": "Username is required"}), 400
-        
-        user = db.Users.find_one({"_id": ObjectId(user_name)})
-        # user = db.Users.find_one({"email": f"{user_name}@sabanciuniv.edu"})
-        if not user:
-            return jsonify({"error": "User not found"}), 404
         try:
             # Find all chats where the user is a participant
             chats = list(db.Chats.find({"user_id": str(user["_id"])}))
         except:
             return jsonify({
+                "status": 0,
                 "error": "Chats collection cannot be found."
             }), 409
             
@@ -52,6 +49,7 @@ def get_user_chats(db):
 
         
         return jsonify({
+            "status": 1,
             "chats": chats
         }), 200
         
