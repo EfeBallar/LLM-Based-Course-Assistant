@@ -16,7 +16,6 @@ JWT_SECRET_KEY = os.getenv("JWT_SECRET_KEY")
 def create_jwt_token(user_info):
     expiration_time = datetime.now(timezone.utc) + timedelta(days=1)  # Token expires in 1 day
 
-    print(user_info)
     payload = {
         "email": user_info['email'],
         "given_name": user_info['given_name'],
@@ -80,12 +79,12 @@ def token_required(f):
             payload = jwt.decode(token, JWT_SECRET_KEY, algorithms=['HS256'])
             
             # Attach user info to request context
-            # request.user = {
-            #     "email": payload["email"],
-            #     "given_name": payload["given_name"],
-            #     "family_name": payload["family_name"],
-            #     "google_id": payload["google_id"]
-            # }
+            request.user = {
+                "email": payload["email"],
+                "given_name": payload["given_name"],
+                "family_name": payload["family_name"],
+                "google_id": payload["google_id"]
+            }
 
         except jwt.ExpiredSignatureError:
             return jsonify({"message": "Token has expired!", "status": 0}), 401
@@ -109,6 +108,7 @@ def login(db):
         id_info = id_token.verify_oauth2_token(
             token, google_requests.Request(), os.getenv("GOOGLE_CLIENT_ID")
         )
+
 
         # Create the JWT token after successful Google login
         user_info = {

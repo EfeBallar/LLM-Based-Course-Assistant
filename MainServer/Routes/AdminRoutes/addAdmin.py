@@ -38,7 +38,7 @@ def add_admin(db):
         # Update the role of the user
         db.Users.update_one(
             {"_id": ObjectId(instructor_id)},
-            {"$set": {"role": "Admin"}}  
+            {"$set": {"role": "admin"}}  
         )
         
         

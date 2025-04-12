@@ -40,7 +40,7 @@ def remove_admin(db):
 
         # Prepare bulk operations (Call 2)
         courses_count = len(admin_to_delete.get("auth_courses", []))
-        new_role = "Instructor" if courses_count > 0 else "User"
+        new_role = "instructor" if courses_count > 0 else "user"
 
         operations = [
             UpdateOne({"_id": instructor_obj_id}, {"$set": {"role": new_role}}),

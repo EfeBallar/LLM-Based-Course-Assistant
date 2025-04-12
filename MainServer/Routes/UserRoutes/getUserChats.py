@@ -22,10 +22,8 @@ def extract_fields(data):
 def get_user_chats(db):
     try:
         request_user = request.user
-        # print(request_user)
 
         user = db.Users.find_one({"email": request_user.get("email")})
-        
         try:
             # Find all chats where the user is a participant
             chats = list(db.Chats.find({"user_id": str(user["_id"])}))
@@ -46,7 +44,6 @@ def get_user_chats(db):
     
         # Create a sorted list of chat IDs with their last message times
         chats.sort(key=lambda x: x['last_message_time'], reverse=True)
-
         
         return jsonify({
             "status": 1,

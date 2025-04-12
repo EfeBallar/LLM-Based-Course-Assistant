@@ -180,12 +180,12 @@ def remove_admin_route():
 
 
 # @app.route('/adminOnlyEndpoint', methods=['GET'])
-# @role_required("Admin")
+# @role_required("admin")
 # def admin_only():
 #     return jsonify({"message": "Welcome Admin! You have access to this route."})
 
 # @app.route('/adminInstructorEndpoint', methods=['GET'])
-# @role_required("Admin", "Instructor")
+# @role_required("admin", "instructor")
 # def admin_instructor_only():
 #     return jsonify({"message": "Hello Admin or Instructor! You can access this route."})
 
