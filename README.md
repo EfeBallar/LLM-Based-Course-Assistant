@@ -2,6 +2,8 @@
 
 This repository contains the source code for the **ENS 491-492 Graduation Project: An LLM-based Course Assistant for Sabancı University**, developed to provide students with a reliable, automated question-answering system based directly on instructor-provided course materials.
 
+For a detailed description of the methodology and results, please refer to the [📄 Final Report](ENS492_Final_Report.pdf)
+
 ## 📖 Project Overview
 The aim of this project is to develop a Retrieval-Augmented Generation (RAG) system that answers students' questions based on documents uploaded by their instructors. By utilizing a quantized open-source Large Language Model hosted on a university GPU server, the assistant offloads repetitive queries from human Teaching Assistants and ensures answers are grounded in verified academic materials without relying on general training data.
 
